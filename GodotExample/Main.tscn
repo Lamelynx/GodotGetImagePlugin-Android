@@ -27,10 +27,20 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonCamera" type="Button" parent="VBoxContainer"]
+[node name="ButtonGalleryMulti" type="Button" parent="VBoxContainer"]
 margin_top = 24.0
 margin_right = 400.0
 margin_bottom = 44.0
+size_flags_horizontal = 3
+text = "Get Gallery Images"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonCamera" type="Button" parent="VBoxContainer"]
+margin_top = 48.0
+margin_right = 400.0
+margin_bottom = 68.0
 size_flags_horizontal = 3
 text = "Get Camera Image"
 __meta__ = {
@@ -38,7 +48,7 @@ __meta__ = {
 }
 
 [node name="Image" type="TextureRect" parent="VBoxContainer"]
-margin_top = 48.0
+margin_top = 72.0
 margin_right = 400.0
 margin_bottom = 400.0
 size_flags_horizontal = 3
@@ -55,4 +65,5 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 [connection signal="pressed" from="VBoxContainer/ButtonGallery" to="." method="_on_ButtonGallery_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonGalleryMulti" to="." method="_on_ButtonGalleryMulti_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonCamera" to="." method="_on_ButtonCamera_pressed"]

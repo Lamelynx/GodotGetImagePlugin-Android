@@ -30,10 +30,6 @@ func _on_ButtonCamera_pressed():
 
 func _on_image_request_completed(path):
 	"""  This function is working but no image is displayed. It does store a copy in extrenaldir folder """
-	print(path)
-	dir_contents("user://")
-	dir_contents("user://new_dir")
-	
 	var image = Image.new()
 	var err = image.load(path)
 	#var err = image.load("/storage/emulated/0/Android/data/org.godotengine.godotexample/files/images/new_dir/image.png")
@@ -46,27 +42,12 @@ func _on_image_request_completed(path):
 	
 	# Proof that image is recieved
 	image.save_png("/storage/emulated/0/Android/data/org.godotengine.godotexample/files/selected_image.png")
-
-func dir_contents(path):
-	# TODO REMOVE FUNCTION
-	var dir = Directory.new()
-	if dir.open(path) == OK:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			else:
-				print("Found file: " + file_name)
-			file_name = dir.get_next()
-	else:
-		print("An error occurred when trying to access the path.")
+	#print(OS.getExternalFilesDir)
 	
 func _on_error(e):
 	print("Error: ", e)
 	
 func _on_permission_not_granted_by_user(permission):
-	print("Accept dialog")
 	var dialog = get_node("AcceptDialog")
 	dialog.window_title = "Permission necessary"
 	var permission_text = permission.capitalize().split(".")[-1]
@@ -76,3 +57,7 @@ func _on_permission_not_granted_by_user(permission):
 	# Set the plugin to get user permission again
 	plugin.resendPermission()
 	
+
+
+func _on_ButtonGalleryMulti_pressed(path):
+	pass # Replace with function body.
