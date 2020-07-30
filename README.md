@@ -1,7 +1,8 @@
 # GodotGetImagePlugin for Godot 3.2.2+
 ======================================
 
-Godot plugin to pick image from gallery or capture image from camera
+Godot android plugin to pick image from gallery or capture image from camera. For Godot 3.2.2 and above.
+
 
 Installation
 ------------
