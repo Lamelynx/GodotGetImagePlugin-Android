@@ -82,3 +82,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# Godot
+!GodotExample/android/plugins

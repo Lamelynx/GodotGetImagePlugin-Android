@@ -3,7 +3,7 @@
 
 Android Godot plugin for picking image from gallery or capture image from camera.
 
-See GodotExample for more info.
+See GodotExample for more info (Godot 3.2.2).
 
 ### Installation
 
@@ -30,7 +30,7 @@ Get image from camera
 
 >resendPermission()
 
-If user decline permission request, call this function before any of the abowe.
+If user decline permission request, call this function before any of the above.
 It's usually a good practice to explain to user why you need the permission.
 
 ### API Signals
