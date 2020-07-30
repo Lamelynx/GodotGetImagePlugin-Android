@@ -25,11 +25,12 @@ import java.io.*
  * Mail: lamelynx@gmail.com
  */
 
-class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
+class GodotGetImage_CreateFiles(activity: Godot) : GodotPlugin(activity) {
 
     private val TAG: String = "godot"
     private val GET_GALLERY_IMAGE_CODE = 101
-    private val GET_CAMERA_IMAGE_CODE = 102
+    private val GET_GALLERY_IMAGES_CODE = 102
+    private val GET_CAMERA_IMAGE_CODE = 103
     private val PERMISSION_REQUEST_CODE = 1001
 
     private var resendPermission = false
@@ -51,10 +52,12 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
     override fun getPluginSignals(): Set<SignalInfo> {
         val signals: MutableSet<SignalInfo> = ArraySet()
-        signals.add(SignalInfo("image_request_completed", Dictionary::class.java))
+        signals.add(SignalInfo("image_request_completed", String::class.java))
+        signals.add(SignalInfo("image_request_completed_list", Dictionary::class.java))
+        signals.add(SignalInfo("image_request_completed_dict", Dictionary::class.java))
         signals.add(SignalInfo("error", String::class.java))
         signals.add(SignalInfo("permission_not_granted_by_user", String::class.java))
-
+        
         return signals
     }
 
@@ -63,11 +66,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     }
 
     fun getGalleryImage() {
-        /**
-         * Select single image from gallery
-         * Returns godot Dictionary of one image as ByteArray
-         */
-
+        /* Select single image from gallery */
         Log.d(TAG, "Call - getGalleryImage")
 
         // Check permission
@@ -80,11 +79,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     }
 
     fun getGalleryImages() {
-        /**
-         * Select multiple images from gallery
-         * Returns godot Dictionary of selected images as ByteArray
-         */
-
+        /* Select multiple images from gallery */
         Log.d(TAG, "Call - getGalleryImages")
 
         // Check permission
@@ -93,7 +88,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);  // TODO Onödig?
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             intent.type = "image/*"
-            activity?.startActivityForResult(intent, GET_GALLERY_IMAGE_CODE)
+            activity?.startActivityForResult(intent, GET_GALLERY_IMAGES_CODE)
         }
     }
 
@@ -108,13 +103,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     }
 
     override fun onMainActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        /**
-         * This will be called by Godot class
-         */
-
-        /*if (requestCode == GET_GALLERY_IMAGE_CODE && resultCode == Activity.RESULT_OK && data != null) {
-
-            Log.e(TAG, "DEPRICATED !!!!!!!!!!!!!!!!!!!!: $resultCode")
+        // This will be called by Godot class
+        if (requestCode == GET_GALLERY_IMAGE_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Log.e(TAG, "Gallery image received, resultCode: $resultCode")
 
             val imageUri: Uri? = data.data
             val bitmap = imageUri?.let { getBitmap(it) }
@@ -126,46 +117,52 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             if (bitmap != null) {
                 storeImage(bitmap, file)
             }
-            if (imageUri != null) {
-                Log.e(TAG, "Path: " + imageUri.path)
-            }
-            if (imageUri != null) {
-                emitSignal("image_request_completed", imageUri.path)
-            } else {
-                emitSignal("error", "No image selected")
-            }
 
-        }  else*/
-        if (requestCode == GET_GALLERY_IMAGE_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            emitSignal("image_request_completed", file.toString())
 
+        }  else if (requestCode == GET_GALLERY_IMAGES_CODE && resultCode == Activity.RESULT_OK && data != null) {
             //val image_list = mutableListOf<String>()
             val image_dict = Dictionary()  // TODO: Godot plugin system does not accept List yet
-
             if (data.clipData != null) {
-                /**
-                 * Multiple image selected
-                 */
-
                 val images = data.clipData
                 val count:Int = images?.itemCount ?: 0
 
                 for (i in 0 until count) {
                     val imageUri: Uri? = images?.getItemAt(i)?.uri
+                    val imagePath = imageUri.toString()
+                    Log.e(TAG, "Path $i : $imagePath")
+
+
                     val bitmap = imageUri?.let { getBitmap(it) }
-                    image_dict[i.toString()] = bitmap?.let { bitmapToByteArray(it) }
+                    // Convert to bytearray and return it with signal to Godot
+                    val stream = ByteArrayOutputStream()
+                    bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    val image = stream.toByteArray()
+                    stream.close()
+                    image_dict[i.toString()] = image
+                    Log.e(TAG, "dfdfdfd $i : " + image.size)
                 }
             } else if (data.getData() != null) {
-                /**
-                * Single image selected
-                */
 
                 val imageUri: Uri? = data.data
                 val bitmap = imageUri?.let { getBitmap(it) }
-                image_dict["0"] = bitmap?.let { bitmapToByteArray(it) }
-            }
+                // Put selected image to internal storage or path
+                val dirPath = File(godot.filesDir, "images")
+                dirPath.mkdirs()
+                val file = File(dirPath, "image.jpg")
+                if (bitmap != null) {
+                    storeImage(bitmap, file)
+                }
 
-            Log.d(TAG, "Number of images selected: " + image_dict.size)
-            emitSignal("image_request_completed", image_dict)
+                //image_list.add(file.toString())
+                //image_dict["0"] = file.toString()
+                Log.e("godot", "Path :" + file.toString())
+
+            }
+            //Log.d(TAG, "Number of images: " + image_list.size)
+            //emitSignal("image_request_completed_list", image_list)
+            Log.d(TAG, "Number of images: " + image_dict.size)
+            emitSignal("image_request_completed_dict", image_dict)
 
         } else if (requestCode == GET_CAMERA_IMAGE_CODE && resultCode == Activity.RESULT_OK && data != null) {
             Log.e(TAG, "Camera image received, resultCode: $resultCode")
@@ -175,24 +172,8 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         }
     }
 
-    fun bitmapToByteArray(bitmap: Bitmap):ByteArray {
-        /**
-         * Convert Bitmap to ByteArray
-         * @return ByteArray object
-         */
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-        stream.close()
-        return stream.toByteArray()
-    }
-
     fun getBitmap(uri: Uri):Bitmap {
-        /**
-         * Uri to bitmap
-         * getBitmap is deprecated for >= SDK 28
-         * @return Bitmap object
-         */
-        //
+        // getBitmap is deprecated for >= SDK 28
         return uri.let {
             if (Build.VERSION.SDK_INT < 28) {
                 Log.e(TAG, "SDK < 28")
@@ -209,12 +190,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     }
 
     fun getPermission(permission: String): Boolean {
-        /**
-         * Ask for permission to user.
-         * If user decline a signal is emitted to Godot.
-         *
-         * @return true if permission is already granted
-         */
+        /* Returns true if permission is already granted */
         var ret = false
 
         if (ContextCompat.checkSelfPermission(
@@ -255,9 +231,6 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     }
 
     private fun storeImage(image: Bitmap, dst: File) {
-        /**
-         *
-         */
         try {
             val fos = FileOutputStream(dst)
             image.compress(Bitmap.CompressFormat.PNG, 100, fos)
