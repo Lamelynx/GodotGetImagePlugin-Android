@@ -16,8 +16,8 @@ Follow these instructions for android custom build, [ official documentation](ht
 Unzip:  
 *release/godotgetimageplugin_for_godot_[your Godot version].zip* to *[your godot project]/android/plugins/*
 
-If your current Godot version does not exists you need to generate new plugin .aar file.  
-Folow these instruction: [ official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/android/android_plugin.html "documentation").
+If there is no GodotGetImagePlugin release for your Godot version, you need to generate new plugin .aar file.  
+Follow these instruction: [ official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/android/android_plugin.html "documentation").
 
 Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Custom Build" and "Godot Get Image" plugin
 
