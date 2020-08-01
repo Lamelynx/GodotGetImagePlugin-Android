@@ -3,7 +3,6 @@ extends Node2D
 var plugin
 var plugin_name = "GodotGetImage"
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if Engine.has_singleton(plugin_name):
@@ -29,7 +28,7 @@ func _on_ButtonGalleryMulti_pressed():
 		plugin.getGalleryImages()
 	else:
 		print(plugin_name, " plugin not loaded!")
-		
+
 func _on_ButtonCamera_pressed():
 	""" Get image from camera """
 	if plugin:
@@ -60,7 +59,7 @@ func _on_error(e):
 	dialog.window_title = "Error!"
 	dialog.dialog_text = e
 	dialog.show()
-	
+
 func _on_permission_not_granted_by_user(permission):
 	print("User won't grant permission, explain why it's important!")
 	var dialog = get_node("AcceptDialog")
@@ -71,22 +70,19 @@ func _on_permission_not_granted_by_user(permission):
 	
 	# Set the plugin to ask user for permission again
 	plugin.resendPermission()
-	
-
 
 func _on_ButtonSetOptions_pressed():
 	""" Set option for all following images """
 	var options = {
-		"image_height" : 256,
-		"image_width" : 256,
-		"keep_aspect" : false
+		"image_height" : 400,
+		"image_width" : 400,
+		"keep_aspect" : true
 	}
 	
 	if plugin:
 		plugin.setOptions(options)
 	else:
 		print(plugin_name, " plugin not loaded!")
-
 
 func _on_ButtonResetOptions_pressed():
 	""" Set options to default """

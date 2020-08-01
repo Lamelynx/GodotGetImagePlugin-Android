@@ -60,7 +60,7 @@ expand = true
 margin_top = 356.0
 margin_right = 401.0
 margin_bottom = 376.0
-text = "Set image size to XXX*XXX but keep aspect ratio"
+text = "Set image size to 400*400 but keep aspect ratio"
 
 [node name="ButtonResetOptions" type="Button" parent="VBoxContainer"]
 margin_top = 380.0

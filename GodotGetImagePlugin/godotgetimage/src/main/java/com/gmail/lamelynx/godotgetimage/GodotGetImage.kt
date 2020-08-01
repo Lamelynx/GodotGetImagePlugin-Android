@@ -38,7 +38,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     private val REQUEST_CAMERA_CAPTURE_ID = 102
     private val REQUEST_PERMISSION_ID = 1001
 
-    private var tempImagePath: File? = null
+    private var tempImage: File? = null
     private var resendPermission = false
     private var imgHeight: Int? = null
     private var imgWidth: Int? = null
@@ -204,7 +204,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             Log.d(TAG, "Number of images selected: " + image_dict.size)
             emitSignal("image_request_completed", image_dict)
 
-        } else if (requestCode == REQUEST_CAMERA_CAPTURE_ID && resultCode == Activity.RESULT_OK && tempImagePath != null) {
+        } else if (requestCode == REQUEST_CAMERA_CAPTURE_ID && resultCode == Activity.RESULT_OK && tempImage != null) {
             /**
              * Image received from camera
              */
@@ -213,7 +213,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             // Gets small thumbnail
             //val bitmapThumbnail = data?.extras?.get("data") as Bitmap
             //val storageDir: File? = godot.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val imageFile: File = tempImagePath as File
+            val imageFile: File = tempImage as File
 
             val imageUri: Uri? = Uri.fromFile(imageFile)
             val bitmap = imageUri?.let { getBitmap(it) }
@@ -232,7 +232,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                 }
             }
 
-            tempImagePath = null  // Reset image file
+            tempImage = null  // Reset image file
 
             emitSignal("image_request_completed", image_dict)
         }
@@ -392,7 +392,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             storageDir /* directory */
         ).apply {
             // Store path to use in onMainActivityResult
-            tempImagePath = this
+            tempImage = this
         }
     }
 }
