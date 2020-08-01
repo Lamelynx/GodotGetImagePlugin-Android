@@ -13,7 +13,6 @@ func _ready():
 
 	if plugin:
 		plugin.connect("image_request_completed", self, "_on_image_request_completed")
-		plugin.connect("image_request_completed_list", self, "_on_image_request_completed_bytearray")
 		plugin.connect("error", self, "_on_error")
 		plugin.connect("permission_not_granted_by_user", self, "_on_permission_not_granted_by_user")
 
@@ -38,24 +37,23 @@ func _on_ButtonCamera_pressed():
 	else:
 		print(plugin_name, " plugin not loaded!")
 
-func _on_image_request_completed_bytearray(dict):
+func _on_image_request_completed(dict):
 	""" Returns Dictionary of PoolByteArray """
 	var count = 0
 	for img_buffer in dict.values():
 		count += 1
-		print(img_buffer)
 		var image = Image.new()
 		var error = image.load_jpg_from_buffer(img_buffer)
 		if error != OK:
 			print("Bytearray: Error loading png/jpg buffer, ", error)
 		else:
-			print("Bytearray: Assigning texture!!!")
+			print("We are now loading texture... ", count)
 			var texture = ImageTexture.new()
 			texture.create_from_image(image)
 			find_node("Image").texture = texture
 			
 			# Proof that image is recieved, keep in mind that this takes some extra time
-			#image.save_png("/storage/emulated/0/Android/data/org.godotengine.godotexample/files/selected_image" + str(count) + ".png")
+			image.save_png("/storage/emulated/0/Android/data/org.godotengine.godotexample/files/image" + str(count) + ".png")
 
 func _on_error(e):
 	var dialog = get_node("AcceptDialog")
@@ -64,6 +62,7 @@ func _on_error(e):
 	dialog.show()
 	
 func _on_permission_not_granted_by_user(permission):
+	print("User won't grant permission, explain why it's important!")
 	var dialog = get_node("AcceptDialog")
 	dialog.window_title = "Permission necessary"
 	var permission_text = permission.capitalize().split(".")[-1]
@@ -73,3 +72,25 @@ func _on_permission_not_granted_by_user(permission):
 	# Set the plugin to ask user for permission again
 	plugin.resendPermission()
 	
+
+
+func _on_ButtonSetOptions_pressed():
+	""" Set option for all following images """
+	var options = {
+		"image_height" : 256,
+		"image_width" : 256,
+		"keep_aspect" : false
+	}
+	
+	if plugin:
+		plugin.setOptions(options)
+	else:
+		print(plugin_name, " plugin not loaded!")
+
+
+func _on_ButtonResetOptions_pressed():
+	""" Set options to default """
+	if plugin:
+		plugin.setOptions({})
+	else:
+		print(plugin_name, " plugin not loaded!")

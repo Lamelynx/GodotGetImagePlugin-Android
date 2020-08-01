@@ -1,47 +1,73 @@
-# GodotGetImagePlugin for Godot 3.2.2+
+GodotGetImagePlugin for Godot 3.2.2+
+====================================
+____________________________________
 
 
-Android Godot plugin for picking image from gallery or capture image from camera.
+Android Godot plugin for picking image from gallery or image capture from.
 
 See GodotExample for more info (Godot 3.2.2).
 
-### Installation
+Installation
+============
 
-* Follow these instructions for android custum build, [ official documentation](https://docs.godotengine.org/en/stable/getting_started/workflow/export/android_custom_build.html "documentation").
+Follow these instructions for android custom build, [ official documentation](https://docs.godotengine.org/en/stable/getting_started/workflow/export/android_custom_build.html "documentation").
 
-* For Godot 3.2.2 unzip:
->release/godotgetimageplugin_for_godot_3.2.2.zip to [your godot project]/android/plugins/ directory
+Unzip:  
+*release/godotgetimageplugin_for_godot_[your Godot version].zip* to *[your godot project]/android/plugins/*
 
-* Activate plugin by turn on Project -> Export -> Options, "Use Custom Build" and "Godot Get Image" plugin
+If your current Godot version does not exists you need to generate new plugin .aar file.  
+Folow these instruction: [ official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/android/android_plugin.html "documentation").
 
-### API  Methods
+Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Custom Build" and "Godot Get Image" plugin
 
-> getGalleryImage()
+# Plugin API
 
+Methods
+-------
+
+***getGalleryImage()***  
 Select one image from gallery
 
-> getGalleryImages()
+***getGalleryImages()***  
+Select multiple images from gallery
 
- Select multiple images from gallery
+***getCameraImage()***  
+Capture image from camera
 
->getCameraImage()
+***resendPermission()***  
+If user has declined permission this needs to be called for a new permission is requested.
 
-Get image from camera
+***setOptions(*** *Dictionary with options* ***)***  
+If you would like a specific size of the images, it can set via this feature.  
+This will apply to all images until options are set again or ***setOptions(*** *{ }* ***)*** is called with an empty dictionary.
 
->resendPermission()
+*This will not make the image larger than the original, in which case the original size will be kept.*
 
-If user decline permission request, call this function before any of the above.
-It's usually a good practice to explain to user why you need the permission.
+#### Available options:
+* *"image_height"* : Sets maximum image height
+* *"image_width"* : Sets maximum image width
+* *"keep_aspect"* : Keep aspect ratio or not
 
-### API Signals
->image_request_completed
+```python
+eg.
+dict = {
+	"image_height" : 1000,
+	"image_width" : 600,
+	"keep_aspect" : true
+}
+```
 
-Returns a Dictionary of image as PoolByteArray
 
->permission_not_granted_by_user
 
-When user won't grant Android permission
+Emitted signals
+---------------
 
->error
+***image_request_completed***  
+Returns a Dictionary with images as PoolByteArray
 
+***permission_not_granted_by_user***   
+User declines Android permission request.  
+It's a good practice to explain why permission is important and then call resendPermission()
+
+***error***  
 Returns any error as string

@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.gmail.lamelynx.godotgetimage">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera"
         android:required="true" />
@@ -8,5 +9,15 @@
         <meta-data
             android:name="org.godotengine.plugin.v1.GodotGetImage"
             android:value="com.gmail.lamelynx.godotgetimage.GodotGetImage" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false"
+            android:authorities="${applicationId}">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths"/>
+        </provider>
     </application>
 </manifest>
