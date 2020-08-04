@@ -44,16 +44,14 @@ func _on_image_request_completed(dict):
 		var image = Image.new()
 		var error = image.load_jpg_from_buffer(img_buffer)
 		if error != OK:
-			print("Bytearray: Error loading png/jpg buffer, ", error)
+			print("Error loading png/jpg buffer, ", error)
 		else:
-			print("We are now loading texture... ", count)
+			print("We are now loading texture... ", count, " image format: ", image.get_format())
+			yield(get_tree(), "idle_frame")
 			var texture = ImageTexture.new()
-			texture.create_from_image(image)
-			find_node("Image").texture = texture
+			texture.create_from_image(image, 0)
+			get_node("VBoxContainer/Image").texture = texture
 			
-			# Proof that image is recieved, keep in mind that this takes some extra time
-			image.save_png("/storage/emulated/0/Android/data/org.godotengine.godotexample/files/image" + str(count) + ".png")
-
 func _on_error(e):
 	var dialog = get_node("AcceptDialog")
 	dialog.window_title = "Error!"
@@ -74,8 +72,8 @@ func _on_permission_not_granted_by_user(permission):
 func _on_ButtonSetOptions_pressed():
 	""" Set option for all following images """
 	var options = {
-		"image_height" : 400,
-		"image_width" : 400,
+		"image_height" : 100,
+		"image_width" : 100,
 		"keep_aspect" : true
 	}
 	

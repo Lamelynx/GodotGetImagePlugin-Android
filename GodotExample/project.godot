@@ -22,6 +22,7 @@ config/icon="res://icon.png"
 [display]
 
 window/size/width=400
+window/dpi/allow_hidpi=true
 window/handheld/orientation="portrait"
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
@@ -38,5 +39,6 @@ quality/intended_usage/framebuffer_allocation.mobile=0
 vram_compression/import_s3tc=false
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
-quality/depth/hdr=false
+quality/shadows/filter_mode=0
+quality/reflections/high_quality_ggx.mobile=true
 environment/default_environment="res://default_env.tres"

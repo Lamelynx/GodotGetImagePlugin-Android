@@ -1,15 +1,14 @@
 package com.gmail.lamelynx.godotgetimage
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createScaledBitmap
-import android.graphics.ImageDecoder
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -17,13 +16,15 @@ import androidx.collection.ArraySet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
-import java.io.*
-import java.text.SimpleDateFormat
-import java.util.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 
 
 /**
@@ -40,11 +41,12 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
     private var tempImage: File? = null
     private var resendPermission = false
+
+    // Options, sets by setOptions()
     private var imgHeight: Int? = null
     private var imgWidth: Int? = null
     private var keepAspect: Boolean? = null
-
-
+    private var imageQuality: Int = 90
 
     init {
         Log.d(TAG, "init GodotGetImage")
@@ -84,6 +86,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             imgWidth = null
             imgHeight = null
             keepAspect = null
+            imageQuality = 90
         } else {
             Log.d(TAG, "Call - setOptions, Options:" + opt.keys + ", Values: " + opt.values)
             if ("image_width" in opt.keys) {
@@ -94,6 +97,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             }
             if ("keep_aspect" in opt.keys) {
                 keepAspect = opt["keep_aspect"] as Boolean
+            }
+            if ("image_quality" in opt.keys) {
+                imageQuality = opt["image_quality"] as Int
             }
         }
     }
@@ -175,34 +181,33 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         if (requestCode == REQUEST_GALLERY_IMAGE_ID && resultCode == Activity.RESULT_OK && data != null) {
             Log.d(TAG, "Received image from gallery")
             //val image_list = mutableListOf<String>()
-            val image_dict = Dictionary()  // TODO: Godot plugin system does not accept List yet
+            val imageDict = Dictionary()  // TODO: Godot plugin system does not accept List yet
 
             if (data.clipData != null) {
-
                 /**
-                 * Multiple image selected
+                 * Image selected
                  */
-
                 val images = data.clipData
                 val count:Int = images?.itemCount ?: 0
 
                 for (i in 0 until count) {
                     val imageUri: Uri? = images?.getItemAt(i)?.uri
-                    val bitmap = imageUri?.let { getBitmap(it) }
-                    image_dict[i.toString()] = bitmap?.let { bitmapToByteArray(it) }
+                    val bitmap = imageUri?.let { loadBitmap(it) }
+                    imageDict[i.toString()] = bitmap?.let { bitmapToByteArray(it) }
                 }
             } else if (data.data != null) {
                 /**
                  * Single image selected
                  */
-
+                // TODO - Is this 'if' ever being executed?
+                Log.d(TAG, "Single image selected")
                 val imageUri: Uri? = data.data
-                val bitmap = imageUri?.let { getBitmap(it) }
-                image_dict["0"] = bitmap?.let { bitmapToByteArray(it) }
+                val bitmap = imageUri?.let { loadBitmap(it) }
+                imageDict["0"] = bitmap?.let { bitmapToByteArray(it) }
             }
 
-            Log.d(TAG, "Number of images selected: " + image_dict.size)
-            emitSignal("image_request_completed", image_dict)
+            Log.d(TAG, "Number of images selected: " + imageDict.size)
+            emitSignal("image_request_completed", imageDict)
 
         } else if (requestCode == REQUEST_CAMERA_CAPTURE_ID && resultCode == Activity.RESULT_OK && tempImage != null) {
             /**
@@ -210,18 +215,15 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
              */
             Log.e(TAG, "Camera image received, resultCode: $resultCode")
 
-            // Gets small thumbnail
-            //val bitmapThumbnail = data?.extras?.get("data") as Bitmap
-            //val storageDir: File? = godot.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
             val imageFile: File = tempImage as File
 
             val imageUri: Uri? = Uri.fromFile(imageFile)
-            val bitmap = imageUri?.let { getBitmap(it) }
-            if (imageUri != null) {
-                Log.d(TAG, "Received images from camera: " + imageUri.path)
-            }
-            val image_dict = Dictionary()
-            image_dict["0"] = bitmap?.let { bitmapToByteArray(it) }
+            val bitmap = imageUri?.let { loadBitmap(it) }
+
+            imageUri?.path?.let { Log.d(TAG, "Received images from camera: $it, resultCode: $resultCode") }
+
+            val imageDict = Dictionary()
+            imageDict["0"] = bitmap?.let { bitmapToByteArray(it) }
 
             // Delete temporary file
             if (imageFile.exists()) {
@@ -234,7 +236,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
             tempImage = null  // Reset image file
 
-            emitSignal("image_request_completed", image_dict)
+            emitSignal("image_request_completed", imageDict)
         }
     }
 
@@ -244,31 +246,31 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          * @return ByteArray object
          */
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, stream)
         stream.close()
         return stream.toByteArray()
     }
 
-    private fun getBitmap(uri: Uri): Bitmap {
+    private fun loadBitmap(uri: Uri): Bitmap {
         /**
          * Uri to bitmap
          * getBitmap is deprecated for >= SDK 28
          * @return Bitmap object
          */
-        //
 
         var bitmap: Bitmap
 
-        if (Build.VERSION.SDK_INT < 28) {
-            Log.e(TAG, "SDK < 28")
-            bitmap = MediaStore.Images.Media.getBitmap(
-                godot.contentResolver,
-                uri
-            )
+        if (imgWidth != null && imgHeight != null) {
+            // If image width/height is set. Load bitmap only as big as necessary to memory.
+            // This does not scale bitmap to the exact size. Need to do another 'exact' scale later on
+            bitmap = decodeSampledBitmapFromUri(uri, imgHeight!!, imgWidth!!)
         } else {
-            Log.e(TAG, "SDK >= 28")
-            val source = ImageDecoder.createSource(godot.contentResolver,  uri)
-            bitmap = ImageDecoder.decodeBitmap(source)
+            // Load image without any max size. May cause 'out of memory' on big images
+            val opt = BitmapFactory.Options()
+            opt.inPreferredConfig = Bitmap.Config.ARGB_8888
+            val inputImage = godot.contentResolver.openInputStream(uri)
+            bitmap = BitmapFactory.decodeStream(inputImage, null, opt)!!
+            inputImage?.close()
         }
 
         if (imgHeight != null && imgWidth != null && keepAspect != null) {
@@ -276,13 +278,15 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
              * Scale image
              */
             Log.d(TAG, "Scale image to $imgWidth * $imgHeight , keep aspect: $keepAspect")
-            if (keepAspect as Boolean) {
-                bitmap = resizeBitmap(bitmap, imgHeight as Int)
+            bitmap = if (keepAspect as Boolean) {
+                resizeBitmap(bitmap, imgHeight as Int)
             } else {
-                bitmap = createScaledBitmap(bitmap, imgWidth as Int, imgHeight as Int, false)
+                createScaledBitmap(bitmap, imgWidth as Int, imgHeight as Int, false)
             }
 
         }
+        Log.d(TAG, "Final image size - width: " + bitmap.width + " height: " + bitmap.height)
+
         return bitmap
     }
 
@@ -332,7 +336,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                 permission
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.d(TAG, "Application has not permission: " + permission.toString())
+            Log.d(TAG, "Application has not permission: $permission")
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     godot,
                     permission
@@ -346,9 +350,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                        godot,
                        arrayOf(permission),
                         REQUEST_PERMISSION_ID
-                    );
+                    )
                 } else {
-                    emitSignal("permission_not_granted_by_user", permission.toString())
+                    emitSignal("permission_not_granted_by_user", permission)
                 }
             } else {
                 // No explanation needed, we can request the permission.
@@ -356,7 +360,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                     godot,
                     arrayOf(permission),
                     REQUEST_PERMISSION_ID
-                );
+                )
             }
         } else {
             // Permission is already granted
@@ -365,34 +369,63 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         return ret
     }
 
-    private fun storeImage(image: Bitmap, dst: File) {
-        /**
-         *
-         */
-        try {
-            val fos = FileOutputStream(dst)
-            image.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            fos.close()
-        } catch (e: FileNotFoundException) {
-            Log.d(TAG, "File not found: " + e.message)
-        } catch (e: IOException) {
-            Log.d(TAG, "Error accessing file: " + e.message)
-        }
-    }
-
-    @SuppressLint("SimpleDateFormat")
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File? = godot.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-            "JPEG_${timeStamp}_", /* prefix */
+            "tmpImage1133", /* prefix */
             ".jpg", /* suffix */
             storageDir /* directory */
         ).apply {
             // Store path to use in onMainActivityResult
             tempImage = this
+        }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
+    }
+
+    private fun decodeSampledBitmapFromUri(
+        uri: Uri,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Bitmap {
+        // First decode with inJustDecodeBounds=true to check dimensions
+        return BitmapFactory.Options().run {
+            // Preload without actually load image
+            inJustDecodeBounds = true
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+            var input: InputStream? = godot.contentResolver.openInputStream(uri)
+            BitmapFactory.decodeStream(input, null, this)
+            input?.close()
+
+            // Calculate inSampleSize
+            inSampleSize = calculateInSampleSize(this, reqWidth, reqHeight)
+
+            // Decode bitmap with inSampleSize set
+            inJustDecodeBounds = false
+            input = godot.contentResolver.openInputStream(uri)
+            val bitmap: Bitmap = BitmapFactory.decodeStream(input, null, this) as Bitmap
+            input?.close()
+            bitmap
         }
     }
 }

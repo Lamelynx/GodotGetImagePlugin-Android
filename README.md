@@ -23,6 +23,8 @@ Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Cust
 
 # Plugin API
 
+It is preferable to set the image size to the maximum desired size before any image requests. This minimize the risk of getting "out of memory" when loading image with unknown sizes.
+
 Methods
 -------
 
@@ -45,16 +47,21 @@ This will apply to all images until options are set again or ***setOptions(*** *
 *This will not make the image larger than the original, in which case the original size will be kept.*
 
 #### Available options:
-* *"image_height"* : Sets maximum image height
-* *"image_width"* : Sets maximum image width
-* *"keep_aspect"* : Keep aspect ratio or not
-
+* *"image_height"* (Int): Sets maximum image height
+* *"image_width"* (Int): Sets maximum image width
+* *"keep_aspect"* (Bool): Keep aspect ratio or not
+* *"image_quality"* (Int 0-100): Sets image compression quality, default is 90. 100 is best quality with least compression.
+	
 ```python
-eg.
+e.g.
 dict = {
 	"image_height" : 1000,
 	"image_width" : 600,
 	"keep_aspect" : true
+}
+or
+dict = {
+	"image_quality" : 40
 }
 ```
 
