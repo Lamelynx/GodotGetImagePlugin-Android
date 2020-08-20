@@ -46,7 +46,7 @@ func _on_image_request_completed(dict):
 		if error != OK:
 			print("Error loading png/jpg buffer, ", error)
 		else:
-			print("We are now loading texture... ", count, " image format: ", image.get_format())
+			print("We are now loading texture... ", count)
 			yield(get_tree(), "idle_frame")
 			var texture = ImageTexture.new()
 			texture.create_from_image(image, 0)

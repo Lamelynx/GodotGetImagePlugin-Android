@@ -213,7 +213,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             /**
              * Image received from camera
              */
-            Log.e(TAG, "Camera image received, resultCode: $resultCode")
+            Log.d(TAG, "Camera image received, resultCode: $resultCode")
 
             val imageFile: File = tempImage as File
 
