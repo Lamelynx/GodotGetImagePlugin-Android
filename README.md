@@ -31,14 +31,21 @@ In short follow these steps:
 2. Copy .aar file to *GodotGetImagePlugin/godot-lib.release/* and rename it to *godot-lib.release.aar*
 
 3. Compile the project:
-	Open command window and *cd* into *GodotGetImagePlugin*
-	Windows:
+
+	Open command window and *cd* into *GodotGetImagePlugin* and run command below
+	
+	* Windows:
+	
 		gradlew.bat assembleRelease
-	Linux:
+		
+	* Linux:
+	
 		./gradlew assembleRelease
 	
 4. Copy the newly created .aar file to your plugin directory:
+
 */GodotGetImagePlugin/godotgetimage/build/outputs/aar/GodotGetImage.release.aar* to *[your godot project]/android/plugins/*
+
 (don't forget to also copy *GodotGetImage.gdap* from any release zip to *[your godot project]/android/plugins/*)
 
 
