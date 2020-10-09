@@ -24,9 +24,9 @@ Follow these instruction: [ official documentation](https://docs.godotengine.org
 
 In short follow these steps:
 
-1. Download [ AAR library for Android plugins] (https://godotengine.org/download/windows "Godot download").
+1. Download [ AAR library for Android plugins](https://godotengine.org/download/windows "Godot download").
 
-2. Copy .aar file to *GodotGetImagePlugin\godot-lib.release\* and rename it to *godot-lib.release.aar*
+2. Copy .aar file to *GodotGetImagePlugin/godot-lib.release/* and rename it to *godot-lib.release.aar*
 
 3. Compile the project:
 	Open command window and *cd* into *GodotGetImagePlugin*
@@ -36,7 +36,7 @@ In short follow these steps:
 		./gradlew assembleRelease
 	
 4. Copy the newly created .aar file to your plugin directory:
-*\GodotGetImagePlugin\godotgetimage\build\outputs\aar\GodotGetImage.release.aar* to *[your godot project]/android/plugins/*
+*/GodotGetImagePlugin/godotgetimage/build/outputs/aar/GodotGetImage.release.aar* to *[your godot project]/android/plugins/*
 (don't forget to also copy *GodotGetImage.gdap* from any release zip to *[your godot project]/android/plugins/*)
 
 
@@ -101,4 +101,4 @@ Returns any error as string
 
 # Donation
 If you like this plugin and really wish to make a donation. 
-Feel free to make a donation to [ The Children's Heart Fund (https://mitt.hjartebarnsfonden.se/14901 "Hjärtebarnsfonden").
+Feel free to make a donation to [ The Children's Heart Fund](https://mitt.hjartebarnsfonden.se/14901 "Hjärtebarnsfonden").
