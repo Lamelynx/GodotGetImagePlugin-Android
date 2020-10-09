@@ -13,13 +13,32 @@ Installation
 
 Follow these instructions for android custom build, [ official documentation](https://docs.godotengine.org/en/stable/getting_started/workflow/export/android_custom_build.html "documentation").
 
-Unzip:  
+1. If exists, unzip the precompiled release zip in the release folder to your android plugin folder:
 *release/godotgetimageplugin_for_godot_[your Godot version].zip* to *[your godot project]/android/plugins/*
+
+2. Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Custom Build" and "Godot Get Image" plugin
+
 
 If there is no GodotGetImagePlugin release for your Godot version, you need to generate new plugin .aar file.  
 Follow these instruction: [ official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/android/android_plugin.html "documentation").
 
-Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Custom Build" and "Godot Get Image" plugin
+In short follow these steps:
+
+1. Download [ AAR library for Android plugins] (https://godotengine.org/download/windows "Godot download").
+
+2. Copy .aar file to *GodotGetImagePlugin\godot-lib.release\* and rename it to *godot-lib.release.aar*
+
+3. Compile the project:
+	Open command window and *cd* into *GodotGetImagePlugin*
+	Windows:
+		gradlew.bat assembleRelease
+	Linux:
+		./gradlew assembleRelease
+	
+4. Copy the newly created .aar file to your plugin directory:
+*\GodotGetImagePlugin\godotgetimage\build\outputs\aar\GodotGetImage.release.aar* to *[your godot project]/android/plugins/*
+(don't forget to also copy *GodotGetImage.gdap* from any release zip to *[your godot project]/android/plugins/*)
+
 
 # Plugin API
 
@@ -79,3 +98,7 @@ It's a good practice to explain why permission is important and then call resend
 
 ***error***  
 Returns any error as string
+
+# Donation
+If you like this plugin and really wish to make a donation. 
+Feel free to make a donation to [ The Children's Heart Fund (https://mitt.hjartebarnsfonden.se/14901 "Hjärtebarnsfonden").
