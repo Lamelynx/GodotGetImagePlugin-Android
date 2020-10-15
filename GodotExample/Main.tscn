@@ -19,7 +19,7 @@ __meta__ = {
 }
 
 [node name="ButtonGallery" type="Button" parent="VBoxContainer"]
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 text = "Get Gallery Image"
@@ -29,7 +29,7 @@ __meta__ = {
 
 [node name="ButtonGalleryMulti" type="Button" parent="VBoxContainer"]
 margin_top = 24.0
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
 text = "Get Gallery Images"
@@ -39,7 +39,7 @@ __meta__ = {
 
 [node name="ButtonCamera" type="Button" parent="VBoxContainer"]
 margin_top = 48.0
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 68.0
 size_flags_horizontal = 3
 text = "Get Camera Image"
@@ -49,7 +49,7 @@ __meta__ = {
 
 [node name="Image" type="TextureRect" parent="VBoxContainer"]
 margin_top = 72.0
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 352.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -59,13 +59,13 @@ stretch_mode = 6
 
 [node name="ButtonSetOptions" type="Button" parent="VBoxContainer"]
 margin_top = 356.0
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 376.0
 text = "Set image size to 100*100 but keep aspect ratio"
 
 [node name="ButtonResetOptions" type="Button" parent="VBoxContainer"]
 margin_top = 380.0
-margin_right = 401.0
+margin_right = 400.0
 margin_bottom = 400.0
 text = "Set options to default"
 

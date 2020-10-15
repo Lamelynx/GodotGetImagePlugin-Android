@@ -6,7 +6,7 @@ ____________________________________
 Android plugin for Godot 3.2.2 and above.  
 Pick one or more images from gallery or capture image from camera.
 
-See GodotExample for more info (Godot 3.2.2).
+See GodotExample for more info (Godot 3.2.3).
 
 Installation
 ============
@@ -79,6 +79,9 @@ This will apply to all images until options are set again or ***setOptions(*** *
 * *"image_width"* (Int): Sets maximum image width
 * *"keep_aspect"* (Bool): Keep aspect ratio or not
 * *"image_quality"* (Int 0-100): Sets image compression quality, default is 90. 100 is best quality with least compression.
+* *"image_format"* (String): Set the compression format returned by plugin (supported formats: *"jpg"* , *"png"*). Default "jpg".
+	
+	* !NOTE! Remember to load correct format in your code: load_jpg_from_buffer() or load_png_from_buffer()
 	
 ```python
 e.g.

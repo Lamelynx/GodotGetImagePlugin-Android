@@ -47,6 +47,10 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     private var imgWidth: Int? = null
     private var keepAspect: Boolean? = null
     private var imageQuality: Int = 90
+    private var imageFormat: String = "jpg"
+
+    // Available image format compression
+    private var supportedImageFormats:List<String> = listOf("jpg", "png")
 
     init {
         Log.d(TAG, "init GodotGetImage")
@@ -87,6 +91,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             imgHeight = null
             keepAspect = null
             imageQuality = 90
+            imageFormat = "jpg"
         } else {
             Log.d(TAG, "Call - setOptions, Options:" + opt.keys + ", Values: " + opt.values)
             if ("image_width" in opt.keys) {
@@ -100,6 +105,14 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             }
             if ("image_quality" in opt.keys) {
                 imageQuality = opt["image_quality"] as Int
+            }
+            if ("image_format" in opt.keys) {
+
+                if (supportedImageFormats.contains(opt["image_format"] as String)) {
+                        imageFormat = opt["image_format"] as String
+                } else {
+                    emitSignal("error", "Image format $opt['image_format'] is not supported!")
+                }
             }
         }
     }
@@ -246,7 +259,12 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          * @return ByteArray object
          */
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, stream)
+        if (imageFormat == "jpg") {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, stream)
+        } else if (imageFormat == "png") {
+            bitmap.compress(Bitmap.CompressFormat.PNG, imageQuality, stream)
+        }
+
         stream.close()
         return stream.toByteArray()
     }
@@ -375,7 +393,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         val storageDir: File? = godot.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "tmpImage1133", /* prefix */
-            ".jpg", /* suffix */
+            ".$imageFormat", /* suffix */
             storageDir /* directory */
         ).apply {
             // Store path to use in onMainActivityResult
