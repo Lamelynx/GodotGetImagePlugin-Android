@@ -92,7 +92,8 @@ dict = {
 }
 or
 dict = {
-	"image_quality" : 40
+	"image_quality" : 40,
+	"image_format" : "png"
 }
 ```
 
