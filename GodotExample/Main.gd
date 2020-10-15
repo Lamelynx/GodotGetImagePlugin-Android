@@ -44,8 +44,8 @@ func _on_image_request_completed(dict):
 		var image = Image.new()
 		
 		# Use load format depending what you have set in plugin setOption()
-		#var error = image.load_jpg_from_buffer(img_buffer)
-		var error = image.load_png_from_buffer(img_buffer)
+		var error = image.load_jpg_from_buffer(img_buffer)
+		#var error = image.load_png_from_buffer(img_buffer)
 		
 		if error != OK:
 			print("Error loading png/jpg buffer, ", error)
@@ -79,8 +79,8 @@ func _on_ButtonSetOptions_pressed():
 		"image_height" : 100,
 		"image_width" : 100,
 		"keep_aspect" : true,
-		#"image_format" : "jpg"
-		"image_format" : "png"
+		"image_format" : "jpg"
+		#"image_format" : "png"
 	}
 	
 	if plugin:
