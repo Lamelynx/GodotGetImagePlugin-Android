@@ -81,7 +81,7 @@ This will apply to all images until options are set again or ***setOptions(*** *
 * *"image_quality"* (Int 0-100): Sets image compression quality, default is 90. 100 is best quality with least compression.
 * *"image_format"* (String): Set the compression format returned by plugin (supported formats: *"jpg"* , *"png"*). Default "jpg".
 	
-**_NOTE:_** Remember to load correct format in your code: load_jpg_from_buffer() or load_png_from_buffer()
+**_NOTE:_** Remember to load correct format in your code: ***load_jpg_from_buffer()*** or ***load_png_from_buffer()***
 	
 ```python
 e.g.
