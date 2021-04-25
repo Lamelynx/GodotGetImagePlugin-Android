@@ -6,7 +6,7 @@ ____________________________________
 Android plugin for Godot 3.2.2 and above.  
 Pick one or more images from gallery or capture image from camera.
 
-See GodotExample for more info (Godot 3.2.3).
+See GodotExample for more info (Godot 3.3).
 
 Installation
 ============
@@ -53,6 +53,32 @@ In short follow these steps:
 
 It is preferable to set the image size to the maximum desired size before any image requests. This minimize the risk of getting "out of memory" when loading image with unknown sizes.
 
+When loading image buffer into your godot image, don't forget ***yield(get_tree(), "idle_frame")***. Otherwise you would get a black image.
+
+From the GodotExample:
+
+```python
+func _on_image_request_completed(dict):
+	""" Returns Dictionary of PoolByteArray """
+	var count = 0
+	for img_buffer in dict.values():
+		count += 1
+		var image = Image.new()
+		
+		# Use load format depending what you have set in plugin setOption()
+		var error = image.load_jpg_from_buffer(img_buffer)
+		#var error = image.load_png_from_buffer(img_buffer)
+		
+		if error != OK:
+			print("Error loading png/jpg buffer, ", error)
+		else:
+			print("We are now loading texture... ", count)
+			yield(get_tree(), "idle_frame")
+			var texture = ImageTexture.new()
+			texture.create_from_image(image, 0)
+			get_node("VBoxContainer/Image").texture = texture
+```			
+			
 Methods
 -------
 

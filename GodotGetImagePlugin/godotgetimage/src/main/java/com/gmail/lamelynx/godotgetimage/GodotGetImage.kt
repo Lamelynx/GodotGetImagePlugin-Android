@@ -158,29 +158,33 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          */
         Log.d(TAG, "Call - getCameraImage")
 
+        val context = godot.context
+
         // Check permission
         if (getPermission(Manifest.permission.CAMERA)) {
 
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                 // Ensure that there's a camera activity to handle the intent
-                takePictureIntent.resolveActivity(godot.packageManager)?.also {
-                    // Create the File where the photo should go
-                    val photoFile: File? = try {
-                        createImageFile()
-                    } catch (ex: IOException) {
-                        // Error occurred while creating the File
-                        emitSignal("error", "Could not create camera capture target file")
-                        null
-                    }
-                    // Continue only if the File was successfully created
-                    photoFile?.also {
-                        val photoURI: Uri = FileProvider.getUriForFile(
-                            godot,
-                            godot.packageName,
-                            it
-                        )
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                        activity?.startActivityForResult(takePictureIntent, REQUEST_CAMERA_CAPTURE_ID)
+                if (context != null) {
+                    takePictureIntent.resolveActivity(context.packageManager).also {
+                        // Create the File where the photo should go
+                        val photoFile: File? = try {
+                            createImageFile()
+                        } catch (ex: IOException) {
+                            // Error occurred while creating the File
+                            emitSignal("error", "Could not create image")
+                            null
+                        }
+                        // Continue only if the File was successfully created
+                        photoFile?.also {
+                            val photoURI: Uri = FileProvider.getUriForFile(
+                                context,
+                                context.packageName,
+                                it
+                            )
+                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                            activity?.startActivityForResult(takePictureIntent, REQUEST_CAMERA_CAPTURE_ID)
+                        }
                     }
                 }
             }
@@ -286,7 +290,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             // Load image without any max size. May cause 'out of memory' on big images
             val opt = BitmapFactory.Options()
             opt.inPreferredConfig = Bitmap.Config.ARGB_8888
-            val inputImage = godot.contentResolver.openInputStream(uri)
+            val inputImage = godot.context?.contentResolver?.openInputStream(uri)
             bitmap = BitmapFactory.decodeStream(inputImage, null, opt)!!
             inputImage?.close()
         }
@@ -349,23 +353,27 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          */
         var ret = false
 
-        if (ContextCompat.checkSelfPermission(
-                godot,
-                permission
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d(TAG, "Application has not permission: $permission")
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    godot,
+        if (godot.context?.let {
+                ContextCompat.checkSelfPermission(
+                    it,
                     permission
                 )
+            } != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.d(TAG, "Application has not permission: $permission")
+            if (activity?.let {
+                    ActivityCompat.shouldShowRequestPermissionRationale(
+                        it,
+                        permission
+                    )
+                }!!
             ) {
                 // User won't grant permission
                 Log.d(TAG, "Permission resend: $resendPermission")
                 if (resendPermission) {
                     resendPermission = false
                     ActivityCompat.requestPermissions(
-                       godot,
+                        activity!!,
                        arrayOf(permission),
                         REQUEST_PERMISSION_ID
                     )
@@ -375,7 +383,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
-                    godot,
+                    activity!!,
                     arrayOf(permission),
                     REQUEST_PERMISSION_ID
                 )
@@ -390,7 +398,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
-        val storageDir: File? = godot.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = godot.context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "tmpImage1133", /* prefix */
             ".$imageFormat", /* suffix */
@@ -431,7 +439,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             // Preload without actually load image
             inJustDecodeBounds = true
             inPreferredConfig = Bitmap.Config.ARGB_8888
-            var input: InputStream? = godot.contentResolver.openInputStream(uri)
+            var input: InputStream? = godot.context?.contentResolver?.openInputStream(uri)
             BitmapFactory.decodeStream(input, null, this)
             input?.close()
 
@@ -440,7 +448,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
             // Decode bitmap with inSampleSize set
             inJustDecodeBounds = false
-            input = godot.contentResolver.openInputStream(uri)
+            input = godot.context?.contentResolver?.openInputStream(uri)
             val bitmap: Bitmap = BitmapFactory.decodeStream(input, null, this) as Bitmap
             input?.close()
             bitmap
