@@ -73,7 +73,7 @@ func _on_image_request_completed(dict):
 			print("Error loading png/jpg buffer, ", error)
 		else:
 			print("We are now loading texture... ", count)
-			yield(get_tree(), "idle_frame")
+			yield(get_tree(), "idle_frame")    <------------- IMPORTANT!
 			var texture = ImageTexture.new()
 			texture.create_from_image(image, 0)
 			get_node("VBoxContainer/Image").texture = texture
