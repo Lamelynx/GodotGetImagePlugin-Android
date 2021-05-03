@@ -1,10 +1,7 @@
 [gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Main.gd" type="Script" id=1]
-
-[sub_resource type="StreamTexture" id=1]
-flags = 4
-load_path = "res://.import/icon.png-487276ed1e3a0c39cad0279d744ee560.stex"
+[ext_resource path="res://Image.tscn" type="PackedScene" id=2]
 
 [node name="Main" type="Node2D"]
 script = ExtResource( 1 )
@@ -47,15 +44,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Image" type="TextureRect" parent="VBoxContainer"]
+[node name="Images" type="GridContainer" parent="VBoxContainer"]
 margin_top = 72.0
 margin_right = 400.0
 margin_bottom = 352.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-texture = SubResource( 1 )
-expand = true
-stretch_mode = 6
+
+[node name="Image" parent="VBoxContainer/Images" instance=ExtResource( 2 )]
+margin_right = 400.0
+margin_bottom = 280.0
 
 [node name="ButtonSetOptions" type="Button" parent="VBoxContainer"]
 margin_top = 356.0

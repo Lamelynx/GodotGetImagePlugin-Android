@@ -3,6 +3,8 @@ extends Node2D
 var plugin
 var plugin_name = "GodotGetImage"
 
+onready var image_scene = preload("res://Image.tscn")
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if Engine.has_singleton(plugin_name):
@@ -15,6 +17,7 @@ func _ready():
 		plugin.connect("error", self, "_on_error")
 		plugin.connect("permission_not_granted_by_user", self, "_on_permission_not_granted_by_user")
 
+	
 func _on_ButtonGallery_pressed():
 	""" Select single images from gallery """
 	if plugin:
@@ -38,6 +41,20 @@ func _on_ButtonCamera_pressed():
 
 func _on_image_request_completed(dict):
 	""" Returns Dictionary of PoolByteArray """
+	
+	# Purge old images
+	for n in get_node("VBoxContainer/Images").get_children():
+		n.queue_free()
+	
+	# Prepare the GridContainer
+	if len(dict.values()) == 1:
+		# Single image is loaded
+		get_node("VBoxContainer/Images").columns = 1
+	else:
+		# Multiple images is loaded
+		get_node("VBoxContainer/Images").columns = 3
+	
+	# Load all images
 	var count = 0
 	for img_buffer in dict.values():
 		count += 1
@@ -54,7 +71,10 @@ func _on_image_request_completed(dict):
 			yield(get_tree(), "idle_frame")
 			var texture = ImageTexture.new()
 			texture.create_from_image(image, 0)
-			get_node("VBoxContainer/Image").texture = texture
+			var image_node = image_scene.instance()
+			image_node.texture = texture
+			get_node("VBoxContainer/Images").add_child(image_node)
+			
 			
 func _on_error(e):
 	var dialog = get_node("AcceptDialog")
