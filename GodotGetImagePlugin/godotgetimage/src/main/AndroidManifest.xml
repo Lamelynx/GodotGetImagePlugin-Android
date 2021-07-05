@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.gmail.lamelynx.godotgetimage">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -10,10 +11,10 @@
             android:name="org.godotengine.plugin.v1.GodotGetImage"
             android:value="com.gmail.lamelynx.godotgetimage.GodotGetImage" />
         <provider
-            android:name="androidx.core.content.FileProvider"
+            android:name=".GGIFileProvider"
             android:grantUriPermissions="true"
             android:exported="false"
-            android:authorities="${applicationId}">
+            android:authorities="${applicationId}.ggi_FileProvider">
 
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"

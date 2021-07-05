@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createScaledBitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -16,7 +15,7 @@ import androidx.collection.ArraySet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.exifinterface.media.ExifInterface
+import androidx.core.content.FileProvider.getUriForFile
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
@@ -31,6 +30,11 @@ import java.io.InputStream
  * Author: Lamelynx
  * Mail: lamelynx@gmail.com
  */
+
+// Make this plugin compatible to other plugins that is using FileProvider()
+// Is used in AndroidManifest.xml
+class GGIFileProvider : FileProvider()
+
 
 class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
@@ -179,7 +183,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                         photoFile?.also {
                             val photoURI: Uri = FileProvider.getUriForFile(
                                 context,
-                                context.packageName,
+                                context.packageName + ".ggi_FileProvider",
                                 it
                             )
                             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
