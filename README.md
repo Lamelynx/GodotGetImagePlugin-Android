@@ -6,7 +6,7 @@ ____________________________________
 Android plugin for Godot 3.2.2 and above.  
 Pick one or more images from gallery or capture image from camera.
 
-See GodotExample for more info (Godot 3.3).
+See GodotExample for more info (Godot 3.3.2).
 
 Installation
 ============
