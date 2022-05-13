@@ -106,7 +106,7 @@ This will apply to all images until options are set again or ***setOptions(*** *
 * *"keep_aspect"* (Bool): Keep aspect ratio or not
 * *"image_quality"* (Int 0-100): Sets image compression quality, default is 90. 100 is best quality with least compression.
 * *"image_format"* (String): Set the compression format returned by plugin (supported formats: *"jpg"* , *"png"*). Default "jpg".
-* *"auto_rotate_image"* (Bool): Plugin will try to set correct orientation of the image. This is not 100% but will mostly return a correct oriented camera imge.
+* *"auto_rotate_image"* (Bool): Plugin will try to set correct orientation of the image. This is not 100% but will mostly return a correct oriented camera image.
 	
 **_NOTE:_** Remember to load correct format in your code: ***load_jpg_from_buffer()*** or ***load_png_from_buffer()***
 	
