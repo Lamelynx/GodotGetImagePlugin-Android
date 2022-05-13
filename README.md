@@ -133,7 +133,7 @@ Emitted signals
 ***image_request_completed***  
 Returns a Dictionary with images as PoolByteArray
 
-**_NOTE:_** Even if the error signal is emitted, this signal may still be emitted. Eg. if non supported image is selected it will return null value
+**_NOTE:_** If non supported image is selected this will return null value
 
 ***permission_not_granted_by_user***   
 User declines Android permission request.  
