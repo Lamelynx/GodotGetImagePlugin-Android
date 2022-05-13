@@ -106,6 +106,7 @@ This will apply to all images until options are set again or ***setOptions(*** *
 * *"keep_aspect"* (Bool): Keep aspect ratio or not
 * *"image_quality"* (Int 0-100): Sets image compression quality, default is 90. 100 is best quality with least compression.
 * *"image_format"* (String): Set the compression format returned by plugin (supported formats: *"jpg"* , *"png"*). Default "jpg".
+* *"auto_rotate_image"* (Bool): Plugin will try to set correct orientation of the image. This is not 100% but will mostly return a correct oriented camera imge.
 	
 **_NOTE:_** Remember to load correct format in your code: ***load_jpg_from_buffer()*** or ***load_png_from_buffer()***
 	
@@ -114,7 +115,8 @@ e.g.
 dict = {
 	"image_height" : 1000,
 	"image_width" : 600,
-	"keep_aspect" : true
+	"keep_aspect" : true,
+	"auto_rotate_image" : true
 }
 or
 dict = {
@@ -130,6 +132,8 @@ Emitted signals
 
 ***image_request_completed***  
 Returns a Dictionary with images as PoolByteArray
+
+**_NOTE:_** Even if the error signal is emitted, this signal may still be emitted. Eg. if non supported image is selected it will return null value
 
 ***permission_not_granted_by_user***   
 User declines Android permission request.  

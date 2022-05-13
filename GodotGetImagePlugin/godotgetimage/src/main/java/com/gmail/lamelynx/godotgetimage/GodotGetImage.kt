@@ -2,12 +2,16 @@ package com.gmail.lamelynx.godotgetimage
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createScaledBitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -15,7 +19,6 @@ import androidx.collection.ArraySet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.content.FileProvider.getUriForFile
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
@@ -24,6 +27,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import kotlin.system.exitProcess
 
 
 /**
@@ -52,6 +56,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     private var keepAspect: Boolean? = null
     private var imageQuality: Int = 90
     private var imageFormat: String = "jpg"
+    private var autoRotateImage: Boolean = false
 
     // Available image format compression
     private var supportedImageFormats:List<String> = listOf("jpg", "png")
@@ -96,6 +101,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             keepAspect = null
             imageQuality = 90
             imageFormat = "jpg"
+            autoRotateImage = false
         } else {
             Log.d(TAG, "Call - setOptions, Options:" + opt.keys + ", Values: " + opt.values)
             if ("image_width" in opt.keys) {
@@ -117,6 +123,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                 } else {
                     emitSignal("error", "Image format $opt['image_format'] is not supported!")
                 }
+            }
+            if ("auto_rotate_image" in opt.keys) {
+                autoRotateImage = opt["auto_rotate_image"] as Boolean
             }
         }
     }
@@ -206,7 +215,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
             if (data.clipData != null) {
                 /**
-                 * Image selected
+                 * One or more images is selected
                  */
                 val images = data.clipData
                 val count:Int = images?.itemCount ?: 0
@@ -218,9 +227,8 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                 }
             } else if (data.data != null) {
                 /**
-                 * Single image selected
+                 * Single image is selected
                  */
-                // TODO - Is this 'if' ever being executed?
                 Log.d(TAG, "Single image selected")
                 val imageUri: Uri? = data.data
                 val bitmap = imageUri?.let { loadBitmap(it) }
@@ -277,42 +285,52 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         return stream.toByteArray()
     }
 
-    private fun loadBitmap(uri: Uri): Bitmap {
+    private fun loadBitmap(uri: Uri): Bitmap? {
         /**
          * Uri to bitmap
          * getBitmap is deprecated for >= SDK 28
          * @return Bitmap object
          */
 
-        var bitmap: Bitmap
+
+        var bitmap: Bitmap? = null
 
         if (imgWidth != null && imgHeight != null) {
+
             // If image width/height is set. Load bitmap only as big as necessary to memory.
             // This does not scale bitmap to the exact size. Need to do another 'exact' scale later on
             bitmap = decodeSampledBitmapFromUri(uri, imgHeight!!, imgWidth!!)
+
         } else {
             // Load image without any max size. May cause 'out of memory' on big images
             val opt = BitmapFactory.Options()
             opt.inPreferredConfig = Bitmap.Config.ARGB_8888
             val inputImage = godot.context?.contentResolver?.openInputStream(uri)
-            bitmap = BitmapFactory.decodeStream(inputImage, null, opt)!!
+
+            bitmap = BitmapFactory.decodeStream(inputImage, null, opt)
+
             inputImage?.close()
         }
 
-        if (imgHeight != null && imgWidth != null && keepAspect != null) {
-            /**
-             * Scale image
-             */
-            Log.d(TAG, "Scale image to $imgWidth * $imgHeight , keep aspect: $keepAspect")
-            bitmap = if (keepAspect as Boolean) {
-                resizeBitmap(bitmap, imgHeight as Int)
-            } else {
-                createScaledBitmap(bitmap, imgWidth as Int, imgHeight as Int, false)
+        // If a unsupported bitmap format (ex. svg) is selected, bitmap is null
+        if (bitmap != null) {
+            if (autoRotateImage) {
+                bitmap = rotateImageIfRequired(godot.context, bitmap, uri)
             }
 
+            if (imgHeight != null && imgWidth != null && keepAspect != null) {
+                /**
+                 * Scale image
+                 */
+                Log.d(TAG, "Scale image to $imgWidth * $imgHeight , keep aspect: $keepAspect")
+                bitmap = if (keepAspect as Boolean) {
+                    resizeBitmap(bitmap, imgHeight as Int)
+                } else {
+                    createScaledBitmap(bitmap, imgWidth as Int, imgHeight as Int, false)
+                }
+            }
+            Log.d(TAG, "Final image size - width: " + bitmap!!.width + " height: " + bitmap.height)
         }
-        Log.d(TAG, "Final image size - width: " + bitmap.width + " height: " + bitmap.height)
-
         return bitmap
     }
 
@@ -457,5 +475,41 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             input?.close()
             bitmap
         }
+    }
+
+    /**
+     * Solution based on https://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
+     * Rotate an image if required.
+     *
+     * @param img           The image bitmap
+     * @param selectedImage Image URI
+     * @return The resulted Bitmap after manipulation
+     */
+    @Throws(IOException::class)
+    private fun rotateImageIfRequired(context: Context?, img: Bitmap, selectedImage: Uri): Bitmap {
+        val input: InputStream? = context?.contentResolver?.openInputStream(selectedImage)
+        val ei: ExifInterface
+
+        if (Build.VERSION.SDK_INT > 23) ei = ExifInterface(input!!) else ei =
+            ExifInterface(selectedImage.path!!)
+
+        val orientation: Int =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270)
+            else -> img
+        }
+    }
+
+    private fun rotateImage(img: Bitmap, degree: Int): Bitmap {
+        Log.d(TAG, "Rotate image $degree degrees")
+        val matrix = Matrix()
+        matrix.postRotate(degree.toFloat())
+        val rotatedImg = Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+        img.recycle()
+        return rotatedImg
     }
 }

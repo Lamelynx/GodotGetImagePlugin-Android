@@ -96,7 +96,7 @@ func _on_permission_not_granted_by_user(permission):
 func _on_ButtonSetOptions_pressed():
 	""" Set option for all following images """
 	var options = {
-		"image_height" : 100,
+		"image_height" : 200,
 		"image_width" : 100,
 		"keep_aspect" : true,
 		"image_format" : "jpg"
@@ -112,5 +112,17 @@ func _on_ButtonResetOptions_pressed():
 	""" Set options to default """
 	if plugin:
 		plugin.setOptions({})
+	else:
+		print(plugin_name, " plugin not loaded!")
+
+
+func _on_ButtonSetOptions2_pressed():
+	""" Set option for all following images """
+	var options = {
+		"auto_rotate_image": true
+	}
+	
+	if plugin:
+		plugin.setOptions(options)
 	else:
 		print(plugin_name, " plugin not loaded!")
