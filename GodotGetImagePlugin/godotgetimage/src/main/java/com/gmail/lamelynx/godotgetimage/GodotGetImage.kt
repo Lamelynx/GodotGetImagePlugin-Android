@@ -57,7 +57,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     private var imageQuality: Int = 90
     private var imageFormat: String = "jpg"
     private var autoRotateImage: Boolean = false
-
+    private var useFrontCamera: Boolean = false
     // Available image format compression
     private var supportedImageFormats:List<String> = listOf("jpg", "png")
 
@@ -102,6 +102,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             imageQuality = 90
             imageFormat = "jpg"
             autoRotateImage = false
+            useFrontCamera = false
         } else {
             Log.d(TAG, "Call - setOptions, Options:" + opt.keys + ", Values: " + opt.values)
             if ("image_width" in opt.keys) {
@@ -126,6 +127,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             }
             if ("auto_rotate_image" in opt.keys) {
                 autoRotateImage = opt["auto_rotate_image"] as Boolean
+            }
+            if ("use_front_camera" in opt.keys) {
+                useFrontCamera = opt["use_front_camera"] as Boolean
             }
         }
     }
@@ -196,6 +200,34 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                                 it
                             )
                             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+
+                            if (useFrontCamera) {
+                                // Try to open camera application with front camera
+
+                                // Extras for displaying the front camera on most devices
+                                takePictureIntent.putExtra("com.google.assistant.extra.USE_FRONT_CAMERA", true)
+                                takePictureIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true)
+                                takePictureIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 1)
+                                takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING", 1)
+
+                                // Extras for displaying the front camera on Samsung
+                                takePictureIntent.putExtra("camerafacing", "front")
+                                takePictureIntent.putExtra("previous_mode", "Selfie")
+
+                                // TODO this part is not tested
+                                val targetPackage = takePictureIntent.resolveActivity(context.packageManager)
+                                //Log.d(TAG, targetPackage.toString())
+                                if (targetPackage?.toString()?.contains("honor", ignoreCase = true) == true) {
+                                    // Extras for displaying the front camera on Honor
+                                    takePictureIntent.putExtra("default_camera", "1")
+                                    takePictureIntent.putExtra("default_mode", "com.hihonor.camera2.mode.photo.PhotoMode")
+                                } else {
+                                    // Extras for displaying the front camera on Huawei
+                                    takePictureIntent.putExtra("default_camera", "1")
+                                    takePictureIntent.putExtra("default_mode", "com.huawei.camera2.mode.photo.PhotoMode")
+                                }
+                            }
+
                             activity?.startActivityForResult(takePictureIntent, REQUEST_CAMERA_CAPTURE_ID)
                         }
                     }

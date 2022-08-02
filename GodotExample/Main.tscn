@@ -44,27 +44,34 @@ __meta__ = {
 [node name="Images" type="GridContainer" parent="VBoxContainer"]
 margin_top = 72.0
 margin_right = 400.0
-margin_bottom = 328.0
+margin_bottom = 304.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Image" parent="VBoxContainer/Images" instance=ExtResource( 2 )]
 margin_right = 400.0
-margin_bottom = 256.0
+margin_bottom = 232.0
 
 [node name="ButtonSetOptions" type="Button" parent="VBoxContainer"]
-margin_top = 332.0
+margin_top = 308.0
 margin_right = 400.0
-margin_bottom = 352.0
+margin_bottom = 328.0
 rect_pivot_offset = Vector2( -646, -209 )
 text = "Set image size to 200*100 but keep aspect ratio"
 
 [node name="ButtonSetOptions2" type="Button" parent="VBoxContainer"]
+margin_top = 332.0
+margin_right = 400.0
+margin_bottom = 352.0
+rect_pivot_offset = Vector2( -646, -209 )
+text = "Set auto_rotate_image option to true"
+
+[node name="ButtonSetOptionsUseFrontCamera" type="Button" parent="VBoxContainer"]
 margin_top = 356.0
 margin_right = 400.0
 margin_bottom = 376.0
 rect_pivot_offset = Vector2( -646, -209 )
-text = "Set auto_rotate_image option to true"
+text = "Set use_front_camer to true"
 
 [node name="ButtonResetOptions" type="Button" parent="VBoxContainer"]
 margin_top = 380.0
@@ -86,4 +93,5 @@ __meta__ = {
 [connection signal="pressed" from="VBoxContainer/ButtonCamera" to="." method="_on_ButtonCamera_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonSetOptions" to="." method="_on_ButtonSetOptions_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonSetOptions2" to="." method="_on_ButtonSetOptions2_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonSetOptionsUseFrontCamera" to="." method="_on_ButtonSetOptionsUseFrontCamera_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonResetOptions" to="." method="_on_ButtonResetOptions_pressed"]

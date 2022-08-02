@@ -126,3 +126,15 @@ func _on_ButtonSetOptions2_pressed():
 		plugin.setOptions(options)
 	else:
 		print(plugin_name, " plugin not loaded!")
+
+
+func _on_ButtonSetOptionsUseFrontCamera_pressed():
+	""" Set option for all following images """
+	var options = {
+		"use_front_camera": true
+	}
+	
+	if plugin:
+		plugin.setOptions(options)
+	else:
+		print(plugin_name, " plugin not loaded!")
