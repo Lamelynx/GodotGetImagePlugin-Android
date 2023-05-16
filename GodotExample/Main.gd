@@ -3,7 +3,7 @@ extends Node2D
 var plugin
 var plugin_name = "GodotGetImage"
 
-onready var image_scene = preload("res://Image.tscn")
+@onready var image_scene = preload("res://Image.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -13,9 +13,9 @@ func _ready():
 		print("Could not load plugin: ", plugin_name)
 
 	if plugin:
-		plugin.connect("image_request_completed", self, "_on_image_request_completed")
-		plugin.connect("error", self, "_on_error")
-		plugin.connect("permission_not_granted_by_user", self, "_on_permission_not_granted_by_user")
+		plugin.connect("image_request_completed", Callable(self, "_on_image_request_completed"))
+		plugin.connect("error", Callable(self, "_on_error"))
+		plugin.connect("permission_not_granted_by_user", Callable(self, "_on_permission_not_granted_by_user"))
 
 	
 func _on_ButtonGallery_pressed():
@@ -40,7 +40,7 @@ func _on_ButtonCamera_pressed():
 		print(plugin_name, " plugin not loaded!")
 
 func _on_image_request_completed(dict):
-	""" Returns Dictionary of PoolByteArray """
+	""" Returns Dictionary of PackedByteArray """
 	
 	# Purge old images
 	for n in get_node("VBoxContainer/Images").get_children():
@@ -68,11 +68,8 @@ func _on_image_request_completed(dict):
 			print("Error loading png/jpg buffer, ", error)
 		else:
 			print("We are now loading texture... ", count)
-			yield(get_tree(), "idle_frame")
-			var texture = ImageTexture.new()
-			texture.create_from_image(image, 0)
-			var image_node = image_scene.instance()
-			image_node.texture = texture
+			var image_node = image_scene.instantiate()
+			image_node.texture = ImageTexture.new().create_from_image(image)
 			get_node("VBoxContainer/Images").add_child(image_node)
 			
 			

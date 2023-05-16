@@ -6,7 +6,7 @@ ____________________________________
 Android plugin for Godot 3.2.2 and above.  
 Pick one or more images from gallery or capture image from camera.
 
-See GodotExample for more info (Godot 3.4.4).
+See GodotExample for more info (Godot 4.0.2).
 
 Installation
 ============
@@ -54,6 +54,8 @@ In short follow these steps:
 It is preferable to set the image size to the maximum desired size before any image requests. This minimize the risk of getting "out of memory" when loading image with unknown sizes.
 
 When loading image buffer into your godot image, don't forget ***yield(get_tree(), "idle_frame")***. Otherwise you would get a black image.
+
+**_NOTE:_** "idle_frame" (or "process_idle" as it was called in Godot 4) is NOT necessary in Godot 4.x
 
 From the GodotExample:
 

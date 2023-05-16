@@ -85,3 +85,4 @@ lint/tmp/
 
 # Godot
 !GodotExample/android/plugins/*.aar
+GodotExample/.godot/

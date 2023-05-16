@@ -249,6 +249,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
                 /**
                  * One or more images is selected
                  */
+
                 val images = data.clipData
                 val count:Int = images?.itemCount ?: 0
 
