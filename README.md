@@ -55,7 +55,7 @@ It is preferable to set the image size to the maximum desired size before any im
 
 When loading image buffer into your godot image, don't forget ***yield(get_tree(), "idle_frame")***. Otherwise you would get a black image.
 
-**_NOTE:_** "idle_frame" (or "process_idle" as it was called in Godot 4) is NOT necessary in Godot 4.x
+**_NOTE:_** "idle_frame" (or "process_frame" as it was called in Godot 4) is NOT necessary in Godot 4.x
 
 From the GodotExample:
 
