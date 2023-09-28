@@ -135,3 +135,16 @@ func _on_ButtonSetOptionsUseFrontCamera_pressed():
 		plugin.setOptions(options)
 	else:
 		print(plugin_name, " plugin not loaded!")
+
+
+func _on_check_button_use_photo_picker_toggled(button_pressed):
+	""" Set option to use Photo picker when selecting image """
+	var options = {
+		"use_photo_picker": button_pressed
+	}
+	
+	if plugin:
+		plugin.setOptions(options)
+	else:
+		print(plugin_name, " plugin not loaded!")
+

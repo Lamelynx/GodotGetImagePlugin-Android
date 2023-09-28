@@ -19,6 +19,10 @@ import androidx.collection.ArraySet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
@@ -27,7 +31,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import kotlin.system.exitProcess
 
 
 /**
@@ -49,6 +52,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
 
     private var tempImage: File? = null
     private var resendPermission = false
+    private lateinit var myPhotoPicker:ActivityResultLauncher<PickVisualMediaRequest>
 
     // Options, sets by setOptions()
     private var imgHeight: Int? = null
@@ -60,9 +64,35 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
     private var useFrontCamera: Boolean = false
     // Available image format compression
     private var supportedImageFormats:List<String> = listOf("jpg", "png")
+    private var usePhotoPicker: Boolean = true
 
     init {
         Log.d(TAG, "init GodotGetImage")
+
+        /*
+        if (godot.context?.let { isPhotoPickerAvailable(it) } == true) {
+            Log.d(TAG, "PhotoPicker is available on this device")
+
+            // Registers a photo picker activity launcher in single-select mode.
+            myPhotoPicker = activity.registerForActivityResult(PickVisualMedia()) { uri ->
+                // Callback is invoked after the user selects a media item or closes the
+                // photo picker.
+                if (uri != null) {
+                    Log.d(TAG, "Selected URI: $uri")
+                } else {
+                    Log.d(TAG, "No media selected")
+                }
+            }
+
+        } else {
+            // If photo picker is no available use old capturing method regardless what is set
+            // through setOptions() from Godot app.
+            usePhotoPicker = false
+            Log.d(TAG, "PhotoPicker is NOT available on this device")
+        }
+        */
+
+
     }
 
     override fun getPluginName(): String {
@@ -103,6 +133,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             imageFormat = "jpg"
             autoRotateImage = false
             useFrontCamera = false
+            usePhotoPicker = true
         } else {
             Log.d(TAG, "Call - setOptions, Options:" + opt.keys + ", Values: " + opt.values)
             if ("image_width" in opt.keys) {
@@ -131,6 +162,9 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
             if ("use_front_camera" in opt.keys) {
                 useFrontCamera = opt["use_front_camera"] as Boolean
             }
+            if ("use_photo_picker" in opt.keys) {
+                usePhotoPicker = opt["use_photo_picker"] as Boolean
+            }
         }
     }
 
@@ -141,9 +175,23 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          */
 
         Log.d(TAG, "Call - getGalleryImage")
+        /*
+        if (usePhotoPicker){
+            myPhotoPicker.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+            return
+        }
+        */
+
+        // Android 13 changed permissions to READ_MEDIA_STORAGE
+        val permissionToRequest =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
 
         // Check permission
-        if (getPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (getPermission(permissionToRequest)) {
             val intent = Intent(Intent.ACTION_PICK)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.type = "image/*"
@@ -158,8 +206,16 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          */
         Log.d(TAG, "Call - getGalleryImages")
 
+        // Android 13 changed permissions to READ_MEDIA_STORAGE
+        val permissionToRequest =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
         // Check permission
-        if (getPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (getPermission(permissionToRequest)) {
             val intent = Intent(Intent.ACTION_PICK)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -326,7 +382,7 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
          */
 
 
-        var bitmap: Bitmap? = null
+        var bitmap: Bitmap?
 
         if (imgWidth != null && imgHeight != null) {
 
@@ -523,8 +579,14 @@ class GodotGetImage(activity: Godot) : GodotPlugin(activity) {
         val input: InputStream? = context?.contentResolver?.openInputStream(selectedImage)
         val ei: ExifInterface
 
-        if (Build.VERSION.SDK_INT > 23) ei = ExifInterface(input!!) else ei =
-            ExifInterface(selectedImage.path!!)
+        if (Build.VERSION.SDK_INT > 23)
+            ei = ExifInterface(input!!)
+        else
+            ei = ExifInterface(selectedImage.path!!)
+
+        if (input != null) {
+            input.close()
+        }
 
         val orientation: Int =
             ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)

@@ -36,7 +36,6 @@ size_flags_vertical = 3
 [node name="Image" parent="VBoxContainer/Images" instance=ExtResource("2")]
 layout_mode = 2
 texture = ExtResource("3_k6h4r")
-stretch_mode = 5
 
 [node name="ButtonSetOptions" type="Button" parent="VBoxContainer"]
 layout_mode = 2
@@ -54,6 +53,13 @@ text = "Set use_front_camer to true"
 layout_mode = 2
 text = "Set options to default"
 
+[node name="CheckButtonUsePhotoPicker" type="CheckButton" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+button_pressed = true
+text = "Use androidx Photo picker
+(Not yet implemented!)"
+
 [node name="AcceptDialog" type="AcceptDialog" parent="."]
 
 [connection signal="pressed" from="VBoxContainer/ButtonGallery" to="." method="_on_ButtonGallery_pressed"]
@@ -63,3 +69,4 @@ text = "Set options to default"
 [connection signal="pressed" from="VBoxContainer/ButtonSetOptions2" to="." method="_on_ButtonSetOptions2_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonSetOptionsUseFrontCamera" to="." method="_on_ButtonSetOptionsUseFrontCamera_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonResetOptions" to="." method="_on_ButtonResetOptions_pressed"]
+[connection signal="toggled" from="VBoxContainer/CheckButtonUsePhotoPicker" to="." method="_on_check_button_use_photo_picker_toggled"]
