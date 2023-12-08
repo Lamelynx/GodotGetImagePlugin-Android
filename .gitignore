@@ -98,6 +98,6 @@ lint/tmp/
 # lint/reports/
 
 # Godot
-!GodotExample/android/plugins/*.aar
+!plugin/demo/addons/GodotGetImage/
 .godot/
 .import/

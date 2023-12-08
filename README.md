@@ -32,7 +32,8 @@ Build plugin .aar file
 
 If there is no GodotGetImage release for your Godot version, you need to generate new plugin .aar file.  
 
-1. Set correct Godot version by edit the gradle file [`plugin/build.gradle.kts`] (plugin/build.gradle.kts):
+1. Set correct Godot version by edit the gradle file [`plugin/build.gradle.kts`](plugin/build.gradle.kts):
+
 ```
 dependencies {
     // Update this to match your Godot engine version

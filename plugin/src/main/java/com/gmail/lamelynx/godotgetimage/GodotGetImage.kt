@@ -21,11 +21,6 @@ import android.provider.MediaStore
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.PickVisualMediaRequest
-
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.plugin.SignalInfo
 import java.io.ByteArrayOutputStream
@@ -64,7 +59,7 @@ class GodotGetImage(godot: Godot): GodotPlugin(godot) {
 
     private var tempImage: File? = null
     private var resendPermission = false
-    private lateinit var myPhotoPicker:ActivityResultLauncher<PickVisualMediaRequest>
+    //private lateinit var myPhotoPicker:ActivityResultLauncher<PickVisualMediaRequest>
 
     // Options, sets by setOptions()
     private var imgHeight: Int? = null

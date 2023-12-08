@@ -38,11 +38,6 @@ android {
 dependencies {
     // Update this to match your Godot engine version
     implementation("org.godotengine:godot:4.2.0.stable")
-    implementation("androidx.activity:activity-ktx:1.7.2")
-    //implementation("androidx.activity:activity-ktx:1.8.1")
-    //implementation("androidx.exifinterface:exifinterface:1.3.6")
-    //implementation("androidx.fragment:fragment-ktx:1.7.0-alpha07")
-    implementation("androidx.appcompat:appcompat:1.6.1")
 }
 
 // BUILD TASKS DEFINITION
