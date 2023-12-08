@@ -97,7 +97,9 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
-# Godot
+# GodotGetImagePlugin
 !plugin/demo/addons/GodotGetImage/
+!plugin/demo/addons/GodotGetImage/bin/debug/GodotGetImage-debug.aar
+!plugin/demo/addons/GodotGetImage/bin/release/GodotGetImage-release.aar
 .godot/
 .import/
