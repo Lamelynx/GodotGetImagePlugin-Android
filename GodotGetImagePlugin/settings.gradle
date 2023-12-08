@@ -1,3 +1,0 @@
-include ':godot-lib.release'
-include ':godotgetimage'
-rootProject.name = "GodotGetImagePlugin"

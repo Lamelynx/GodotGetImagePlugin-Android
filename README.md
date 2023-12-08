@@ -1,86 +1,80 @@
-GodotGetImagePlugin for Godot 3.2.2+
+GodotGetImage plugin for Godot 4.2+ 
 ====================================
 ____________________________________
 
 
-Android plugin for Godot 3.2.2+ and Godot 4.  
+Android plugin for Godot 4.2+.
 Pick one or more images from gallery or capture image from camera.
 
-See GodotExample for more info (Godot 4.1.1).
+See demo project [`plugin/demo/`](plugin/demo/) (Godot 4.2.0).
+
+**_NOTE:_** Starting in Godot 4.2, Android plugins built on the v1 architecture are now deprecated. Instead, Godot 4.2 introduces a new Version 2 (v2) architecture for Android plugins. This plugin is from now on build on Godot Plugin v2 system.
+
+More information about v2 architecture: [official documentation] (https://docs.godotengine.org/en/stable/tutorials/platform/android/android_plugin.html "documentation")
+
+Upgrade from Godot plugin v1 to v2 architecture
+===============================================
+
+1. Remove GodotGetImageRelease.arr and GodotGetImage.gdap in the folder: *[you project]/android/plugin*
+
+2. Follow installation instructions below
 
 Installation
 ============
 
-Follow these instructions for android custom build, [ official documentation](https://docs.godotengine.org/en/stable/getting_started/workflow/export/android_custom_build.html "documentation").
-
 1. If exists, unzip the precompiled release zip in the release folder to your android plugin folder:
-*release/godotgetimageplugin_for_godot_[your Godot version].zip* to *[your godot project]/android/plugins/*
+*release/godotgetimageplugin_for_godot_[your Godot version].zip* to *[your godot project]/addons/*
 
-2. Activate plugin in Godot by enable "Project" -> "Export" -> "Options", "Use Custom Build" and "Godot Get Image" plugin
+2. Activate plugin in Godot by enable Navigate to `Project` -> `Project Settings...` -> `Plugins`, and ensure the plugin "GodotGetImage" is enabled.
 
-Generate plugin .aar file
--------------------------
+Build plugin .aar file
+----------------------
 
-If there is no GodotGetImagePlugin release for your Godot version, you need to generate new plugin .aar file.  
-Follow these instruction: [ official documentation](https://docs.godotengine.org/en/stable/tutorials/plugins/android/android_plugin.html "documentation").
+If there is no GodotGetImage release for your Godot version, you need to generate new plugin .aar file.  
 
-In short follow these steps:
+1. Set correct Godot version by edit the gradle file [`plugin/build.gradle.kts`] (plugin/build.gradle.kts):
+```
+dependencies {
+    // Update this to match your Godot engine version
+    implementation("org.godotengine:godot:4.2.0.stable")
+```
 
-1. Download [ AAR library for Android plugins](https://godotengine.org/download/windows "Godot download").
+2. Compile the project:
 
-2. Copy .aar file to *GodotGetImagePlugin/godot-lib.release/* and rename it to *godot-lib.release.aar*
-
-3. Compile the project:
-
-	Open command window and *cd* into *GodotGetImagePlugin* and run command below
+	Open command window and *cd* into plugin root directory and run command below
 	
 	* Windows:
 	
-		gradlew.bat assembleRelease
+		gradlew.bat assemble
 		
 	* Linux:
 	
-		./gradlew assembleRelease
+		./gradlew assemble
 	
-4. Copy the newly created .aar file to your plugin directory:
-
-*/GodotGetImagePlugin/godotgetimage/build/outputs/aar/GodotGetImage.release.aar* to *[your godot project]/android/plugins/*
-
-(don't forget to also copy *GodotGetImage.gdap* from any release zip to *[your godot project]/android/plugins/*)
-
+3. On successful completion of the build, the output files can be found in
+  [`plugin/demo/addons/GodotGetImage`](plugin/demo/addons/GodotGetImage)
 
 # Plugin API
 
 It is preferable to set the image size to the maximum desired size before any image requests. This minimize the risk of getting "out of memory" when loading image with unknown sizes.
 
-When loading image buffer into your godot image, don't forget ***yield(get_tree(), "idle_frame")***. Otherwise you would get a black image.
+~~When loading image buffer into your godot image, don't forget ***yield(get_tree(), "idle_frame")***. Otherwise you would get a black image.~~
 
 **_NOTE:_** "idle_frame" (or "process_frame" as it was called in Godot 4) is NOT necessary in Godot 4.x
 
-From the GodotExample:
+Permissions
+-----------
 
-```python
-func _on_image_request_completed(dict):
-	""" Returns Dictionary of PoolByteArray """
-	var count = 0
-	for img_buffer in dict.values():
-		count += 1
-		var image = Image.new()
-		
-		# Use load format depending what you have set in plugin setOption()
-		var error = image.load_jpg_from_buffer(img_buffer)
-		#var error = image.load_png_from_buffer(img_buffer)
-		
-		if error != OK:
-			print("Error loading png/jpg buffer, ", error)
-		else:
-			print("We are now loading texture... ", count)
-			yield(get_tree(), "idle_frame")    <------------- IMPORTANT!
-			var texture = ImageTexture.new()
-			texture.create_from_image(image, 0)
-			get_node("VBoxContainer/Image").texture = texture
-```			
-			
+The plugin should handle all permissions that is neede. If any problem set these permission in Godot editor -> Project -> Export window:
+
+*Read External Storage*
+
+*Read Media Images*
+
+**_NOTE:_** As of Godot 4.2 this permission does not exists in the editor.
+
+*Camera*
+	
 Methods
 -------
 
