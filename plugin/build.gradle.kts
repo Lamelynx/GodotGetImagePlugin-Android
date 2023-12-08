@@ -38,6 +38,7 @@ android {
 dependencies {
     // Update this to match your Godot engine version
     implementation("org.godotengine:godot:4.2.0.stable")
+    implementation("androidx.activity:activity-ktx:1.7.2")
 }
 
 // BUILD TASKS DEFINITION
